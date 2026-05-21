@@ -123,10 +123,32 @@ st.subheader("📊 Historique de vos Vidéos Générées")
 conn = sqlite3.connect("video_history.db")
 cursor = conn.cursor()
 
-# Sélection des colonnes (doit correspondre à votre structure de table)
+# --- SECTION HISTORIQUE VISIBLE SUR L'APPLICATION ---
+st.markdown("---")
+st.subheader("📊 Historique de vos Vidéos Générées")
+
+# 1. On ouvre explicitement la connexion avant de créer le curseur
+conn = sqlite3.connect("video_history.db")
+cursor = conn.cursor()
+
+# 2. Sélection des colonnes (SQL)
 cursor.execute("SELECT date_creation, theme, capital, script, statut FROM videos ORDER BY id DESC")
 lignes = cursor.fetchall()
+
+# 3. On ferme proprement après avoir récupéré les données
 conn.close()
+
+# --- AFFICHAGE DES RÉSULTATS DANS STREAMLIT ---
+if lignes:
+    for row in lignes:
+        # row[0]=date, row[1]=thème, row[2]=capital, row[3]=script, row[4]=statut
+        with st.expander(f"📅 {row[0]} | 🎬 {row[1]} ({row[2]} F CFA)"):
+            st.write(f"**Statut :** {row[4]}")
+            st.write(f"**Script déclamé :**")
+            st.code(row[3], language="text")
+else:
+    st.caption("Aucune vidéo dans l'historique pour le moment. Lancez votre première confection !")
+
 
 # --- AFFICHAGE DE L'HISTORIQUE ---
 if lignes:
