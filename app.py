@@ -40,10 +40,7 @@ mise_fixe = int(capital * 0.02)
 # Clés d'API (Barre latérale)
 INVIDEO_API_KEY = st.sidebar.text_input("Clé API Vidéo :", type="password")
 
-# 4. ACTION DE GÉNÉRATION ET ENREGISTREMENT
-if st.button("🚀 Confectionner la Vidéo"):
-    if not INVIDEO_API_KEY:
-        # 4. ACTION DE GÉNÉRATION ET ENREGISTREMENT
+# 4. ACTION DE GÉNÉRATION ET ENREGISTREMENT (CORRIGÉ SANS LE DOUBLON)
 if st.button("🚀 Confectionner la Vidéo"):
     with st.spinner("Confection de la vidéo par l'IA et enregistrement dans l'historique..."):
         
@@ -80,6 +77,10 @@ if st.button("🚀 Confectionner la Vidéo"):
         st.info(f"**Texte envoyé à l'IA :** {script_genere}")
         if not INVIDEO_API_KEY:
             st.warning("⚠️ Note : Génération effectuée en mode démo car aucune clé API n'a été saisie.")
+
+# 5. SECTION HISTORIQUE VISIBLE SUR L'APPLICATION
+st.markdown("---")
+st.subheader("📊 Historique de vos Vidéos Générées")
 
 # Lecture des données sauvegardées de manière sécurisée
 conn_lecture = sqlite3.connect("video_history.db")
