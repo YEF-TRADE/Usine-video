@@ -60,6 +60,7 @@ query = '''
 '''
 
 # Exécution sécurisée avec les 5 variables requises
+from datetime import datetime
 cursor.execute(query, (date_actuelle, theme, capital, script_genere, "Générée avec succès"))
 conn.commit()
 conn.close()
