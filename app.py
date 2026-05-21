@@ -8,8 +8,8 @@ st.set_page_config(page_title="Base44 IA Video Factory", page_icon="🎬", layou
 # --- INITIALISATION DE LA BASE DE DONNÉES LOCALES (SQLite) ---
 def init_db():
   conn = sqlite3.connect("video_history.db")
-    cursor = conn.cursor()
-    cursor.execute('''
+  cursor = conn.cursor()
+  cursor.execute('''
         CREATE TABLE IF NOT EXISTS videos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             date TEXT,
@@ -19,8 +19,8 @@ def init_db():
             statut TEXT
         )
     ''')
-    conn.commit()
-    conn.close()
+  conn.commit()
+  conn.close()
 
 init_db()
 
