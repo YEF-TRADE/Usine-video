@@ -130,6 +130,16 @@ st.subheader("📊 Historique de vos Vidéos Générées")
 # 1. On ouvre explicitement la connexion avant de créer le curseur
 conn = sqlite3.connect("video_history.db")
 cursor = conn.cursor()
+# On s'assure d'ouvrir la connexion juste avant la ligne 135
+conn = sqlite3.connect("video_history.db")
+cursor = conn.cursor()
+
+# Ligne 135 (Corrigée)
+cursor.execute("SELECT date_creation, theme, capital, script, statut FROM videos ORDER BY id DESC")
+lignes = cursor.fetchall()
+
+# On ferme la connexion après avoir récupéré les lignes
+conn.close()
 
 # 2. Sélection des colonnes (SQL)
 cursor.execute("SELECT date_creation, theme, capital, script, statut FROM videos ORDER BY id DESC")
