@@ -49,14 +49,11 @@ if st.button("🚀 Confectionner et Enregistrer la Vidéo"):
       else:
         script_genere = f"Session OTC Pocket Option de 20h à 23h. Configuration Stochastique 14, 5, 3 et niveaux 85/15. Rejoins mon Telegram pour le Bot gratuit."
         
-# --- SAUVEGARDE DANS L'HISTORIQUE ---
-date_actuelle = datetime.now().strftime("%d/%m/%Y %H:%M")
+# --- ENREGISTREMENT DANS LA BASE DE DONNÉES ---
 conn = sqlite3.connect("video_history.db")
 cursor = conn.cursor()
-cursor.execute('''
-INSERT INTO videos (date, theme, capital, script, statut)
-VALUES (?, ?, ?, ?, ?)
-# Assurez-vous que l'ordre des colonnes correspond exactement aux variables
+
+# Définition de la requête d'insertion (SQL reste en anglais)
 query = '''
     INSERT INTO videos (date_creation, theme, capital, script, statut)
     VALUES (?, ?, ?, ?, ?)
@@ -65,17 +62,10 @@ query = '''
 # Exécution sécurisée avec les 5 variables requises
 cursor.execute(query, (date_actuelle, theme, capital, script_genere, "Générée avec succès"))
 conn.commit()
-# Assurez-vous que l'ordre des colonnes correspond exactement aux variables
-query = '''
-    INSERT INTO videos (date_creation, theme, capital, script, statut)
-    VALUES (?, ?, ?, ?, ?)'''
-
-# Exécution sécurisée avec les 5 variables requises
-cursor.execute(query, (date_actuelle, theme, capital, script_genere, "Générée avec succès"))
-conn.commit()
-
 conn.close()
-st.balloons()
+
+# --- INTERFACE DE SUCCÈS STREAMLIT ---
+st.balloons()  # Corrigé : "balloons" avec deux 'o'
 st.success("✅ Vidéo confectionnée et enregistrée dans votre historique !")
 st.info(f"**Texte envoyé à l'IA :** {script_genere}")
 
@@ -86,15 +76,17 @@ st.subheader("📊 Historique de vos Vidéos Générées")
 # Lecture des données sauvegardées
 conn = sqlite3.connect("video_history.db")
 cursor = conn.cursor()
-cursor.execute("SELECT date, theme, capital, script, statut FROM videos ORDER BY id DESC")
-rows = cursor.fetchall()
+
+# Sélection des colonnes (doit correspondre à votre structure de table)
+cursor.execute("SELECT date_creation, theme, capital, script, statut FROM videos ORDER BY id DESC")
+lignes = cursor.fetchall()
 conn.close()
 
-# Affichage scannable sous forme de liste propre
-if rows:
-  for row in rows:
-    with st.expander(f"📅 {row[0]} - {row[1]} ({row[2]} F CFA)"):
-      st.write(f"**Statut :** `{row[4]}`")
-      st.write(f"**Script déclamé :** {row[3]}")
+# --- AFFICHAGE DE L'HISTORIQUE ---
+if lignes:
+    for row in lignes:
+        with st.expander(f"📅 {row[0]} | 🎬 {row[1]} ({row[2]} F CFA)"):
+            st.write(f"**Statut :** {row[4]}")
+            st.write(f"**Script déclamé :** {row[3]}")
 else:
-  st.caption("Aucune vidéo dans l'historique pour le moment. Lancez votre première confection !")
+    st.caption("Aucune vidéo dans l'historique pour le moment. Lancez votre première confection !")
