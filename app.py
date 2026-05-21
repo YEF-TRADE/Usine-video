@@ -56,8 +56,25 @@ cursor = conn.cursor()
 cursor.execute('''
 INSERT INTO videos (date, theme, capital, script, statut)
 VALUES (?, ?, ?, ?, ?)
-''', (date_actuelle, theme, capital, script_genere, "Générée avec succès"))
+# Assurez-vous que l'ordre des colonnes correspond exactement aux variables
+query = '''
+    INSERT INTO videos (date_creation, theme, capital, script, statut)
+    VALUES (?, ?, ?, ?, ?)
+'''
+
+# Exécution sécurisée avec les 5 variables requises
+cursor.execute(query, (date_actuelle, theme, capital, script_genere, "Générée avec succès"))
 conn.commit()
+# Assurez-vous que l'ordre des colonnes correspond exactement aux variables
+query = '''
+    INSERT INTO videos (date_creation, theme, capital, script, statut)
+    VALUES (?, ?, ?, ?, ?)
+'''
+
+# Exécution sécurisée avec les 5 variables requises
+cursor.execute(query, (date_actuelle, theme, capital, script_genere, "Générée avec succès"))
+conn.commit()
+
 conn.close()
 st.balloons()
 st.success("✅ Vidéo confectionnée et enregistrée dans votre historique !")
