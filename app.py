@@ -69,8 +69,7 @@ conn.commit()
 query = '''
     INSERT INTO videos (date_creation, theme, capital, script, statut)
     VALUES (?, ?, ?, ?, ?)
-'''
-
+    '''
 # Exécution sécurisée avec les 5 variables requises
 cursor.execute(query, (date_actuelle, theme, capital, script_genere, "Générée avec succès"))
 conn.commit()
