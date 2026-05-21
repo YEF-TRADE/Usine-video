@@ -43,39 +43,43 @@ INVIDEO_API_KEY = st.sidebar.text_input("Clé API Vidéo :", type="password")
 # 4. ACTION DE GÉNÉRATION ET ENREGISTREMENT
 if st.button("🚀 Confectionner la Vidéo"):
     if not INVIDEO_API_KEY:
-        st.warning("Veuillez renseigner votre clé API vidéo dans la barre latérale pour lancer la génération.")
-    else:
-        with st.spinner("Confection de la vidéo par l'IA et enregistrement dans l'historique..."):
+        # 4. ACTION DE GÉNÉRATION ET ENREGISTREMENT
+if st.button("🚀 Confectionner la Vidéo"):
+    with st.spinner("Confection de la vidéo par l'IA et enregistrement dans l'historique..."):
+        
+        # Rédaction du script dynamique selon le thème choisi
+        if "Martingale" in theme:
+            script_genere = f"Arrête de doubler tes mises sur Pocket Option ! C'est le piège. Avec {capital} F CFA, ta mise maximale est de {mise_fixe} F CFA. Rejoins mon Telegram en bio."
+        else:
+            script_genere = f"Session OTC Pocket Option de 20h à 23h. Configuration Stochastique 14, 5, 3 et niveaux 85/15. Rejoins mon Telegram pour le Bot gratuit."
+        
+        # Détermination du statut selon la présence de la clé API
+        if INVIDEO_API_KEY:
+            statut_video = "Générée avec succès (InVideo API)"
+        else:
+            statut_video = "Générée avec succès (Mode Démo / Sans Clé)"
             
-            # Rédaction du script dynamique selon le thème choisi
-            if "Martingale" in theme:
-                script_genere = f"Arrête de doubler tes mises sur Pocket Option ! C'est le piège. Avec {capital} F CFA, ta mise maximale est de {mise_fixe} F CFA. Rejoins mon Telegram en bio."
-            else:
-                script_genere = f"Session OTC Pocket Option de 20h à 23h. Configuration Stochastique 14, 5, 3 et niveaux 85/15. Rejoins mon Telegram pour le Bot gratuit."
-            
-            # Génération de la date au moment du clic
-            date_actuelle = datetime.now().strftime("%d/%m/%Y %H:%M")
-            
-            # Insertion des données dans la base SQLite
-            conn = sqlite3.connect("video_history.db")
-            cursor = conn.cursor()
-            
-            query = '''
-                INSERT INTO videos (date_creation, theme, capital, script, statut)
-                VALUES (?, ?, ?, ?, ?)
-            '''
-            cursor.execute(query, (date_actuelle, theme, str(capital), script_genere, "Générée avec succès"))
-            conn.commit()
-            conn.close()
-            
-            # Effets visuels de réussite
-            st.balloons()
-            st.success("✅ Vidéo confectionnée et enregistrée dans votre historique !")
-            st.info(f"**Texte envoyé à l'IA :** {script_genere}")
-
-# 5. SECTION HISTORIQUE VISIBLE SUR L'APPLICATION
-st.markdown("---")
-st.subheader("📊 Historique de vos Vidéos Générées")
+        # Génération de la date au moment du clic
+        date_actuelle = datetime.now().strftime("%d/%m/%Y %H:%M")
+        
+        # Insertion des données dans la base SQLite
+        conn = sqlite3.connect("video_history.db")
+        cursor = conn.cursor()
+        
+        query = '''
+            INSERT INTO videos (date_creation, theme, capital, script, statut)
+            VALUES (?, ?, ?, ?, ?)
+        '''
+        cursor.execute(query, (date_actuelle, theme, str(capital), script_genere, statut_video))
+        conn.commit()
+        conn.close()
+        
+        # Effets visuels de réussite
+        st.balloons()
+        st.success("✅ Vidéo confectionnée et enregistrée dans votre historique !")
+        st.info(f"**Texte envoyé à l'IA :** {script_genere}")
+        if not INVIDEO_API_KEY:
+            st.warning("⚠️ Note : Génération effectuée en mode démo car aucune clé API n'a été saisie.")
 
 # Lecture des données sauvegardées de manière sécurisée
 conn_lecture = sqlite3.connect("video_history.db")
