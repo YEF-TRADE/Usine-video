@@ -1,15 +1,20 @@
 import streamlit as st
 import sqlite3
 from datetime import datetime
+import os
 
 # 1. CONFIGURATION DE LA PAGE
 st.set_page_config(page_title="Base44 IA Video Factory", page_icon="🎬", layout="centered")
 
+DB_NAME = "video_history.db"
+
 # 2. FONCTIONS DE LA BASE DE DONNÉES (SQLITE)
 def init_db():
-    """Initialise la base de données locale si elle n'existe pas."""
-    conn = sqlite3.connect("video_history.db")
+    """Initialise ou répare la base de données locale."""
+    conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
+    
+    # Force la création de la table avec la structure exacte requise
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS videos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -24,20 +29,33 @@ def init_db():
     conn.close()
 
 def sauvegarder_video(date_creation, theme, capital, script, statut):
-    """Enregistre de manière sécurisée une vidéo dans l'historique."""
-    conn = sqlite3.connect("video_history.db")
-    cursor = conn.cursor()
-    query = '''
-        INSERT INTO videos (date_creation, theme, capital, script, statut)
-        VALUES (?, ?, ?, ?, ?)
-    '''
-    cursor.execute(query, (date_creation, theme, str(capital), script, statut))
-    conn.commit()
-    conn.close()
+    """Enregistre une vidéo et recrée la table en cas d'erreur de structure."""
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        query = '''
+            INSERT INTO videos (date_creation, theme, capital, script, statut)
+            VALUES (?, ?, ?, ?, ?)
+        '''
+        cursor.execute(query, (date_creation, theme, str(capital), script, statut))
+        conn.commit()
+        conn.close()
+    except sqlite3.OperationalError:
+        # Si la table existante sur Streamlit Cloud est corrompue/obsolète, on la supprime et on la recrée
+        if os.path.exists(DB_NAME):
+            conn.close()
+            os.remove(DB_NAME)
+        init_db()
+        # Deuxième tentative après réinitialisation propre
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        cursor.execute(query, (date_creation, theme, str(capital), script, statut))
+        conn.commit()
+        conn.close()
 
 def extraire_historique():
     """Récupère toutes les vidéos enregistrées."""
-    conn = sqlite3.connect("video_history.db")
+    conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     try:
         cursor.execute("SELECT date_creation, theme, capital, script, statut FROM videos ORDER BY id DESC")
@@ -85,7 +103,7 @@ if st.button("🚀 Confectionner la Vidéo"):
         # Sauvegarde en Session State pour l'affichage ultérieur
         st.session_state.script_genere = script_final
 
-        # Appel de la fonction de sauvegarde (Totalement isolée du scope global)
+        # Appel de la fonction de sauvegarde sécurisée
         sauvegarder_video(date_actuelle, theme_choisi, capital_saisi, script_final, statut_video)
 
         # Déclenchement de l'affichage de succès et rechargement
@@ -105,10 +123,9 @@ st.subheader("📊 Historique de vos Vidéos Générées")
 
 lignes_historique = extraire_historique()
 
-# Affichage des résultats avec les index de colonnes SQL corrigés
+# Affichage des résultats avec les index de colonnes SQL
 if lignes_historique:
     for row in lignes_historique:
-        # row[0]: date, row[1]: theme, row[2]: capital, row[3]: script, row[4]: statut
         with st.expander(f"📅 {row[0]} | 🎬 {row[1]} ({row[2]} F CFA)"):
             st.write(f"**Statut :** {row[4]}")
             st.write(f"**Script déclamé :**")
