@@ -30,8 +30,8 @@ st.write("Générez vos vidéos d'affiliation en un clic et suivez votre histori
 
 # Formulaire de configuration
 theme = st.selectbox(
-    "Thème de la campagne :",
-    ["Piège de la Martingale", "Stratégie Stochastique 14-5-3", "Session Flash 20h-23h"]
+  "Thème de la campagne :",
+  ["Piège de la Martingale", "Stratégie Stochastique 14-5-3", "Session Flash 20h-23h"]
 )
 capital = st.number_input("Capital affiché (F CFA) :", value=260000)
 mise_fixe = int(capital * 0.02)
