@@ -59,12 +59,56 @@ query = '''
     VALUES (?, ?, ?, ?, ?)
 '''
 
-# Exécution sécurisée avec les 5 variables requises
 from datetime import datetime
-theme = st.selectbox("Choisissez un thème :", ["Éducation", "Divertissement", "Business"])
-cursor.execute(query, (date_actuelle, theme, capital, script_genere, "Générée avec succès"))
+import sqlite3
+import streamlit as st
+
+# 1. EN-TÊTE / CONFIGURATION DE LA BASE
+conn = sqlite3.connect("video_history.db")
+cursor = conn.cursor()
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS videos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date_creation TEXT,
+        theme TEXT,
+        capital TEXT,
+        script TEXT,
+        statut TEXT
+    )
+''')
 conn.commit()
 conn.close()
+
+# 2. FORMULAIRE DE SAISIE (En haut de la page)
+st.title("🎬 Usine à Vidéo")
+
+theme = st.selectbox("Choisissez un thème :", ["Éducation", "Divertissement", "Business"])
+capital = st.number_input("Capital disponible (F CFA) :", min_value=0, value=50000)
+
+# Simulez ou générez votre script ici
+script_genere = "Voici le script automatique généré par l'IA..."
+
+# 3. ACTION D'ENREGISTREMENT (Déclenchée par un bouton)
+if st.button("🚀 Confectionner la vidéo"):
+    # Génération de la date au moment du clic
+    date_actuelle = datetime.now().strftime("%d/%m/%Y %H:%M")
+    
+    # Connexion et insertion
+    conn = sqlite3.connect("video_history.db")
+    cursor = conn.cursor()
+    
+    query = '''
+        INSERT INTO videos (date_creation, theme, capital, script, statut)
+        VALUES (?, ?, ?, ?, ?)
+    '''
+    
+    cursor.execute(query, (date_actuelle, theme, str(capital), script_genere, "Générée avec succès"))
+    conn.commit()
+    conn.close()
+    
+    st.balloons()
+    st.success("✅ Vidéo confectionnée et enregistrée dans votre historique !")
+
 
 # --- INTERFACE DE SUCCÈS STREAMLIT ---
 st.balloons()  # Corrigé : "balloons" avec deux 'o'
