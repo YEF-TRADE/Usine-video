@@ -40,43 +40,53 @@ mise_fixe = int(capital * 0.02)
 # Clés d'API (Barre latérale)
 INVIDEO_API_KEY = st.sidebar.text_input("Clé API Vidéo :", type="password")
 
-# 4. ACTION DE GÉNÉRATION ET ENREGISTREMENT (CORRIGÉ SANS LE DOUBLON)
+# 4. GESTION DE L'ÉTAT ET ACTION DE GÉNÉRATION
+if "script_genere" not in st.session_state:
+    st.session_state.script_genere = None
+if "show_success" not in st.session_state:
+    st.session_state.show_success = False
+
 if st.button("🚀 Confectionner la Vidéo"):
     with st.spinner("Confection de la vidéo par l'IA et enregistrement dans l'historique..."):
-        
         # Rédaction du script dynamique selon le thème choisi
         if "Martingale" in theme:
-            script_genere = f"Arrête de doubler tes mises sur Pocket Option ! C'est le piège. Avec {capital} F CFA, ta mise maximale est de {mise_fixe} F CFA. Rejoins mon Telegram en bio."
+            st.session_state.script_genere = f"Arrête de doubler tes mises sur Pocket Option ! C'est le piège. Avec {capital} F CFA, ta mise maximale est de {mise_fixe} F CFA. Rejoins mon Telegram en bio."
         else:
-            script_genere = f"Session OTC Pocket Option de 20h à 23h. Configuration Stochastique 14, 5, 3 et niveaux 85/15. Rejoins mon Telegram pour le Bot gratuit."
-        
+            st.session_state.script_genere = f"Session OTC Pocket Option de 20h à 23h. Configuration Stochastique 14, 5, 3 et niveaux 85/15. Rejoins mon Telegram pour le Bot gratuit."
+
         # Détermination du statut selon la présence de la clé API
         if INVIDEO_API_KEY:
             statut_video = "Générée avec succès (InVideo API)"
         else:
             statut_video = "Générée avec succès (Mode Démo / Sans Clé)"
-            
+
         # Génération de la date au moment du clic
         date_actuelle = datetime.now().strftime("%d/%m/%Y %H:%M")
-        
+
         # Insertion des données dans la base SQLite
         conn = sqlite3.connect("video_history.db")
         cursor = conn.cursor()
-        
         query = '''
             INSERT INTO videos (date_creation, theme, capital, script, statut)
             VALUES (?, ?, ?, ?, ?)
         '''
-        cursor.execute(query, (date_actuelle, theme, str(capital), script_genere, statut_video))
+        cursor.execute(query, (date_actuelle, theme, str(capital), st.session_state.script_genere, statut_video))
         conn.commit()
         conn.close()
-        
-        # Effets visuels de réussite
-        st.balloons()
-        st.success("✅ Vidéo confectionnée et enregistrée dans votre historique !")
-        st.info(f"**Texte envoyé à l'IA :** {script_genere}")
-        if not INVIDEO_API_KEY:
-            st.warning("⚠️ Note : Génération effectuée en mode démo car aucune clé API n'a été saisie.")
+
+        st.session_state.show_success = True
+        st.rerun()
+
+# Affichage des messages en sortie d'action
+if st.session_state.get("show_success", False):
+    st.balloons()
+    st.success("✅ Vidéo confectionnée et enregistrée dans votre historique !")
+    st.info(f"**Texte envoyé à l'IA :** {st.session_state.script_genere}")
+    if not INVIDEO_API_KEY:
+        st.warning("⚠️ Note : Génération effectuée en mode démo car aucune clé API n'a été saisie.")
+    
+    # Réinitialisation après affichage
+    st.session_state.show_success = False
 
 # 5. SECTION HISTORIQUE VISIBLE SUR L'APPLICATION
 st.markdown("---")
@@ -85,19 +95,16 @@ st.subheader("📊 Historique de vos Vidéos Générées")
 # Lecture des données sauvegardées de manière sécurisée
 conn_lecture = sqlite3.connect("video_history.db")
 cursor_lecture = conn_lecture.cursor()
-
 try:
     cursor_lecture.execute("SELECT date_creation, theme, capital, script, statut FROM videos ORDER BY id DESC")
     lignes = cursor_lecture.fetchall()
 except sqlite3.OperationalError:
     lignes = []
-
 conn_lecture.close()
 
 # Affichage des résultats sous forme de liste propre et déroulante
 if lignes:
     for row in lignes:
-        # row[0]=date, row[1]=thème, row[2]=capital, row[3]=script, row[4]=statut
         with st.expander(f"📅 {row[0]} | 🎬 {row[1]} ({row[2]} F CFA)"):
             st.write(f"**Statut :** {row[4]}")
             st.write(f"**Script déclamé :**")
