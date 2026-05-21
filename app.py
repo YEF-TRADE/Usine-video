@@ -134,9 +134,17 @@ cursor = conn.cursor()
 conn = sqlite3.connect("video_history.db")
 cursor = conn.cursor()
 
+# On s'assure d'ouvrir la connexion juste avant la ligne 135
+conn = sqlite3.connect("video_history.db")
+cursor = conn.cursor()
+
 # Ligne 135 (Corrigée)
 cursor.execute("SELECT date_creation, theme, capital, script, statut FROM videos ORDER BY id DESC")
 lignes = cursor.fetchall()
+
+# On ferme la connexion après avoir récupéré les lignes
+conn.close()
+
 
 # On ferme la connexion après avoir récupéré les lignes
 conn.close()
