@@ -7,23 +7,21 @@ st.set_page_config(page_title="Base44 IA Video Factory", page_icon="🎬", layou
 
 # --- INITIALISATION DE LA BASE DE DONNÉES LOCALES (SQLite) ---
 def init_db():
-  conn = sqlite3.connect("video_history.db")
-  cursor = conn.cursor()
-  cursor.execute('''
-        CREATE TABLE IF NOT EXISTS videos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date TEXT,
-            theme TEXT,
-            capital INTEGER,
-            script TEXT,
-            statut TEXT
-        )
-    ''')
-  conn.commit()
-  conn.close()
+    conn = sqlite3.connect("video_history.db")
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS videos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            theme TEXT,
+            path TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    conn.commit()
+    conn.close()
 
+# Appel de la fonction
 init_db()
-
 # --- INTERFACE UTILISATEUR ---
 st.title("🎬 Usine à Vidéos TikTok Automatisée")
 st.write("Générez vos vidéos d'affiliation en un clic et suivez votre historique de production.")
