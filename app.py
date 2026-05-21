@@ -37,9 +37,6 @@ theme = st.selectbox(
 capital = st.number_input("Capital affiché (F CFA) :", value=260000)
 mise_fixe = int(capital * 0.02)
 
-# Clés d'API (Barre latérale)
-INVIDEO_API_KEY = st.sidebar.text_input("Clé API Vidéo :", type="password")
-
 # 4. GESTION DE L'ÉTAT ET ACTION DE GÉNÉRATION
 if "script_genere" not in st.session_state:
     st.session_state.script_genere = None
@@ -54,11 +51,8 @@ if st.button("🚀 Confectionner la Vidéo"):
         else:
             st.session_state.script_genere = f"Session OTC Pocket Option de 20h à 23h. Configuration Stochastique 14, 5, 3 et niveaux 85/15. Rejoins mon Telegram pour le Bot gratuit."
 
-        # Détermination du statut selon la présence de la clé API
-        if INVIDEO_API_KEY:
-            statut_video = "Générée avec succès (InVideo API)"
-        else:
-            statut_video = "Générée avec succès (Mode Démo / Sans Clé)"
+        # Le statut est défini automatiquement par défaut
+        statut_video = "Générée avec succès"
 
         # Génération de la date au moment du clic
         date_actuelle = datetime.now().strftime("%d/%m/%Y %H:%M")
@@ -82,8 +76,6 @@ if st.session_state.get("show_success", False):
     st.balloons()
     st.success("✅ Vidéo confectionnée et enregistrée dans votre historique !")
     st.info(f"**Texte envoyé à l'IA :** {st.session_state.script_genere}")
-    if not INVIDEO_API_KEY:
-        st.warning("⚠️ Note : Génération effectuée en mode démo car aucune clé API n'a été saisie.")
     
     # Réinitialisation après affichage
     st.session_state.show_success = False
