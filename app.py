@@ -44,14 +44,14 @@ if st.button("🚀 Confectionner et Enregistrer la Vidéo"):
     st.warning("Veuillez renseigner votre clé API vidéo dans la barre latérale pour lancer la génération.")
   else:
     with st.spinner("Confection de la vidéo par l'IA et enregistrement dans l'historique..."):
-           
-            # Rédaction du script dynamique
+      
+      # Rédaction du script dynamique
       if "Martingale" in theme:
         script_genere = f"Arrête de doubler tes mises sur Pocket Option ! C'est le piège. Avec {capital} F CFA, ta mise maximale est de {mise_fixe} F CFA. Rejoins mon Telegram en bio."
       else:
         script_genere = f"Session OTC Pocket Option de 20h à 23h. Configuration Stochastique 14, 5, 3 et niveaux 85/15. Rejoins mon Telegram pour le Bot gratuit."
-           
-            # --- SAUVEGARDE DANS L'HISTORIQUE ---
+        
+# --- SAUVEGARDE DANS L'HISTORIQUE ---
 date_actuelle = datetime.now().strftime("%d/%m/%Y %H:%M")
 conn = sqlite3.connect("video_history.db")
 cursor = conn.cursor()
