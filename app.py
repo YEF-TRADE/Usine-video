@@ -39,7 +39,7 @@ mise_fixe = int(capital * 0.02)
 
 # 4. GESTION DE L'ÉTAT ET ACTION DE GÉNÉRATION
 if "script_genere" not in st.session_state:
-    st.session_state.script_genere = None
+    st.session_state.script_genere = ""
 if "show_success" not in st.session_state:
     st.session_state.show_success = False
 
@@ -47,24 +47,23 @@ if st.button("🚀 Confectionner la Vidéo"):
     with st.spinner("Confection de la vidéo par l'IA et enregistrement dans l'historique..."):
         # Rédaction du script dynamique selon le thème choisi
         if "Martingale" in theme:
-            st.session_state.script_genere = f"Arrête de doubler tes mises sur Pocket Option ! C'est le piège. Avec {capital} F CFA, ta mise maximale est de {mise_fixe} F CFA. Rejoins mon Telegram en bio."
+            script_final = f"Arrête de doubler tes mises sur Pocket Option ! C'est le piège. Avec {capital} F CFA, ta mise maximale est de {mise_fixe} F CFA. Rejoins mon Telegram en bio."
         else:
-            st.session_state.script_genere = f"Session OTC Pocket Option de 20h à 23h. Configuration Stochastique 14, 5, 3 et niveaux 85/15. Rejoins mon Telegram pour le Bot gratuit."
+            script_final = f"Session OTC Pocket Option de 20h à 23h. Configuration Stochastique 14, 5, 3 et niveaux 85/15. Rejoins mon Telegram pour le Bot gratuit."
 
-        # Le statut est défini automatiquement par défaut
+        # Sauvegarde en session state pour l'affichage visuel
+        st.session_state.script_genere = script_final
         statut_video = "Générée avec succès"
-
-        # Génération de la date au moment du clic
         date_actuelle = datetime.now().strftime("%d/%m/%Y %H:%M")
 
-        # Insertion des données dans la base SQLite
+        # Insertion des données dans la base SQLite (utilisation de la variable locale stable)
         conn = sqlite3.connect("video_history.db")
         cursor = conn.cursor()
         query = '''
             INSERT INTO videos (date_creation, theme, capital, script, statut)
             VALUES (?, ?, ?, ?, ?)
         '''
-        cursor.execute(query, (date_actuelle, theme, str(capital), st.session_state.script_genere, statut_video))
+        cursor.execute(query, (date_actuelle, theme, str(capital), script_final, statut_video))
         conn.commit()
         conn.close()
 
@@ -77,14 +76,14 @@ if st.session_state.get("show_success", False):
     st.success("✅ Vidéo confectionnée et enregistrée dans votre historique !")
     st.info(f"**Texte envoyé à l'IA :** {st.session_state.script_genere}")
     
-    # Réinitialisation après affichage
+    # Réinitialisation de l'alerte de succès pour le prochain clic
     st.session_state.show_success = False
 
 # 5. SECTION HISTORIQUE VISIBLE SUR L'APPLICATION
 st.markdown("---")
 st.subheader("📊 Historique de vos Vidéos Générées")
 
-# Lecture des données sauvegardées de manière sécurisée
+# Lecture des données sauvegardées
 conn_lecture = sqlite3.connect("video_history.db")
 cursor_lecture = conn_lecture.cursor()
 try:
@@ -94,7 +93,7 @@ except sqlite3.OperationalError:
     lignes = []
 conn_lecture.close()
 
-# Affichage des résultats sous forme de liste propre et déroulante
+# Affichage des résultats corrigé (avec les bons index de tuples row[x])
 if lignes:
     for row in lignes:
         with st.expander(f"📅 {row[0]} | 🎬 {row[1]} ({row[2]} F CFA)"):
